@@ -17,6 +17,16 @@ root_agent = Agent(
     description="Agent to answer questions using Wikipedia.",
     instruction="I can answer your questions by searching Wikipedia! Ask me about a historical figure.",
     # Add the LangChain Wikipedia tool below
-
-
+        tools = [
+        # Use the LangchainTool wrapper...
+        LangchainTool(
+            # to pass in a LangChain tool.
+            # In this case, the WikipediaQueryRun tool,
+            # which requires the WikipediaAPIWrapper as
+            # part of the tool.
+            tool=WikipediaQueryRun(
+              api_wrapper=WikipediaAPIWrapper()
+            )
+        )
+    ]
 )

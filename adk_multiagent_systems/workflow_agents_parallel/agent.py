@@ -38,6 +38,69 @@ def append_to_state(
 
 
 # Agents
+box_office_researcher = Agent(
+    name="box_office_researcher",
+    model=model_name,
+    description="Considers the box office potential of this film",
+    instruction="""
+    PLOT_OUTLINE:
+    {{ PLOT_OUTLINE? }}
+
+    INSTRUCTIONS:
+    Write a report on the box office potential of a movie like that described in PLOT_OUTLINE based on the reported box office performance of other recent films.
+    """,
+    output_key="box_office_report"
+)
+
+casting_agent = Agent(
+    name="casting_agent",
+    model=model_name,
+    description="Generates casting ideas for this film",
+    instruction="""
+    PLOT_OUTLINE:
+    {{ PLOT_OUTLINE? }}
+
+    INSTRUCTIONS:
+    Generate ideas for casting for the characters described in PLOT_OUTLINE
+    by suggesting actors who have received positive feedback from critics and/or
+    fans when they have played similar roles.
+    """,
+    output_key="casting_report"
+)
+
+preproduction_team = ParallelAgent(
+    name="preproduction_team",
+    sub_agents=[
+        box_office_researcher,
+        casting_agent
+    ]
+)
+
+
+critic = Agent(
+    name="critic",
+    model=model_name,
+    description="Reviews the outline so that it can be improved.",
+    instruction="""
+    INSTRUCTIONS:
+    Consider these questions about the PLOT_OUTLINE:
+    - Does it meet a satisfying three-act cinematic structure?
+    - Do the characters' struggles seem engaging?
+    - Does it feel grounded in a real time period in history?
+    - Does it sufficiently incorporate historical details from the RESEARCH?
+
+    If significant improvements can be made, use the 'append_to_state' tool to add your feedback to the field 'CRITICAL_FEEDBACK'.
+    Explain your decision and briefly summarize the feedback you have provided.
+
+    PLOT_OUTLINE:
+    {{ PLOT_OUTLINE? }}
+
+    RESEARCH:
+    {{ research? }}
+    """,
+    tools=[append_to_state],
+)
+
 
 file_writer = Agent(
     name="file_writer",
@@ -53,9 +116,19 @@ file_writer = Agent(
         - for a file name, use the movie title
         - Write to the 'movie_pitches' directory.
         - If the function takes an 'overwrite' parameter, set it to 'true'. 
-        - For the 'content' to write, extract the following from the PLOT_OUTLINE:
-            - A logline
-            - Synopsis or plot outline
+        - For the 'content' to write, include:
+            - The PLOT_OUTLINE
+            - The BOX_OFFICE_REPORT
+            - The CASTING_REPORT
+
+    PLOT_OUTLINE:
+    {{ PLOT_OUTLINE? }}
+
+    BOX_OFFICE_REPORT:
+    {{ box_office_report? }}
+
+    CASTING_REPORT:
+    {{ casting_report? }}
     """,
     tools=[
         CrewaiTool(
@@ -121,12 +194,25 @@ researcher = Agent(
     ],
 )
 
+
+writers_room = LoopAgent(
+    name="writers_room",
+    description="Iterates through research and writing to improve a movie plot outline.",
+    sub_agents=[
+        researcher,
+        screenwriter,
+        critic
+    ],
+    max_iterations=3,
+)
+
+
 film_concept_team = SequentialAgent(
     name="film_concept_team",
     description="Write a film plot outline and save it as a text file.",
     sub_agents=[
-        researcher,
-        screenwriter,
+        writers_room,
+        preproduction_team,
         file_writer
     ],
 )
