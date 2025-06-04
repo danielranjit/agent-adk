@@ -8,7 +8,7 @@ from google.adk.tools import VertexAiSearchTool
 
 # Create your vertexai_search_tool and update its path below
 vertexai_search_tool = VertexAiSearchTool(
-   data_store_id="projects/YOUR_PROJECT_ID/locations/global/collections/default_collection/dataStores/YOUR_DATA_STORE_ID"
+   data_store_id="projects/qwiklabs-gcp-01-a80a34502ff4/locations/global/collections/default_collection/dataStores/planet-search_1748916382631"
 )
 
 
@@ -21,7 +21,10 @@ root_agent = Agent(
    # in a multi-agent system know when to call it.
    description="Answer questions using your data store access.",
    # Instructions to set the agent's behavior.
-   instruction="You analyze new planet discoveries and engage with the scientific community on them.",
+   instruction="
+   Assume that you are space scientist. As per the data you fetched from datastore
+   You analyze new planet discoveries and engage with the scientific community on them.
+   Explain those concepts in a simple way as if you are explaining to a kid",
    # Add google_search tool to perform grounding with Google search.
    tools=[vertexai_search_tool]
 )

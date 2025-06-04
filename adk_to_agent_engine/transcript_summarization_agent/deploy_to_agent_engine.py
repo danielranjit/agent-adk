@@ -17,7 +17,6 @@ remote_app = agent_engines.create(
     display_name=os.getenv("APP_NAME", "Agent App"),
     agent_engine=root_agent,
     requirements=[
-        "google-adk==0.5.0",
-        "google-cloud-aiplatform[agent_engines]"
+        "google-cloud-aiplatform[adk,agent_engines]"
     ]
 )

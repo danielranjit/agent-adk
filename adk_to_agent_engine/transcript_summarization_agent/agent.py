@@ -8,6 +8,6 @@ load_dotenv()
 root_agent = Agent(
     name="transcript_summarization_agent",
     description="Summarizes chat transcripts.",
-    model=os.getenv("MODEL", "gemini-2.0-flash-exp"),
+    model=os.getenv("MODEL", "gemini-2.0-flash-001"),
     instruction="Summarize the provided chat transcript.",
 )
